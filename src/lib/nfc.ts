@@ -27,10 +27,6 @@ export async function getNfcStatus(): Promise<NfcStatus> {
   }
 }
 
-/**
- * Read an NDEF text record from a tag tapped to the phone.
- * Returns the decoded payload, or null if cancelled/unsupported.
- */
 export async function readNdefOnce(): Promise<string | null> {
   const m = await load();
   if (!m) return null;
@@ -51,13 +47,54 @@ export async function readNdefOnce(): Promise<string | null> {
 }
 
 /**
- * Stub for HCE (host card emulation). True bidirectional HCE on Android
- * requires a small native service; in v1 the merchant displays a QR code
- * and the customer scans with the camera (Solana Pay flow). We expose the
- * same interface here so the rest of the app can stay agnostic.
+ * Wait for any NFC tag to come into the field and return its UID as a
+ * lowercase hex string. Works with NTAG, MIFARE Classic/Ultralight, ISO-DEP
+ * and Ndef-formatted tags — covers virtually any consumer NFC token
+ * (wristbands, stickers, transit cards, hotel keycards). Returns null if the
+ * scan is cancelled, the device has no NFC, or the tag exposes no UID.
  */
+export async function readTagUid(): Promise<string | null> {
+  const m = await load();
+  if (!m) return null;
+  const { default: Nfc, NfcTech } = m;
+  try {
+    await Nfc.requestTechnology([
+      NfcTech.NfcA,
+      NfcTech.IsoDep,
+      NfcTech.MifareClassic,
+      NfcTech.MifareUltralight,
+      NfcTech.Ndef,
+    ]);
+    const tag = await Nfc.getTag();
+    const id = tag?.id;
+    return typeof id === "string" && id.length > 0 ? id.toLowerCase() : null;
+  } catch {
+    return null;
+  } finally {
+    try {
+      await Nfc.cancelTechnologyRequest();
+    } catch {}
+  }
+}
+
+/** Cancel any in-flight readTagUid() / readNdefOnce(). */
+export async function cancelTagRead(): Promise<void> {
+  if (!cached) return;
+  try {
+    await cached.default.cancelTechnologyRequest();
+  } catch {}
+}
+
+/** "04:a3:b2:c9" style display formatting for a hex UID. */
+export function formatUid(uid: string): string {
+  return uid
+    .toUpperCase()
+    .match(/.{1,2}/g)
+    ?.join(":") ?? uid;
+}
+
 export async function broadcastNdefStub(_payload: string): Promise<void> {
-  // No-op for v1. See README for the v1.5 HCE path.
+  // No-op for v1. HCE phone-to-phone is the v1.5 milestone.
 }
 
 export const nfcCapabilityHint = CAN_USE_MWA

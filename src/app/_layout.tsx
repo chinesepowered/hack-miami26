@@ -38,6 +38,7 @@ export default function RootLayout() {
           <Stack.Screen name="send" options={{ title: "Send" }} />
           <Stack.Screen name="scan" options={{ title: "Scan to pay" }} />
           <Stack.Screen name="receive" options={{ title: "Receive" }} />
+          <Stack.Screen name="tap" options={{ title: "Tap to pay" }} />
           <Stack.Screen name="history" options={{ title: "Activity" }} />
           <Stack.Screen name="settings" options={{ title: "Settings" }} />
         </Stack>

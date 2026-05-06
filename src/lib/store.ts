@@ -25,9 +25,20 @@ export type Contact = {
   emoji?: string;
 };
 
+export type PairedTag = {
+  uid: string;
+  label: string;
+  recipient: string;
+  amount?: number;
+  token?: "SOL" | "USDC";
+  memo?: string;
+  pairedAt: number;
+};
+
 type AppState = {
   history: TxRecord[];
   contacts: Contact[];
+  pairedTags: PairedTag[];
   perTapCap: number;
   dailyCap: number;
   microThreshold: number;
@@ -36,6 +47,8 @@ type AppState = {
   updateTx: (id: string, patch: Partial<TxRecord>) => void;
   addContact: (c: Contact) => void;
   removeContact: (id: string) => void;
+  pairTag: (t: PairedTag) => void;
+  unpairTag: (uid: string) => void;
   setCaps: (p: Partial<Pick<AppState, "perTapCap" | "dailyCap" | "microThreshold">>) => void;
   setDefaultToken: (t: "SOL" | "USDC") => void;
 };
@@ -45,6 +58,7 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       history: [],
       contacts: [],
+      pairedTags: [],
       perTapCap: 50,
       dailyCap: 200,
       microThreshold: 5,
@@ -58,6 +72,15 @@ export const useAppStore = create<AppState>()(
       addContact: (c) => set((s) => ({ contacts: [c, ...s.contacts] })),
       removeContact: (id) =>
         set((s) => ({ contacts: s.contacts.filter((c) => c.id !== id) })),
+      pairTag: (t) =>
+        set((s) => ({
+          pairedTags: [
+            t,
+            ...s.pairedTags.filter((p) => p.uid !== t.uid),
+          ],
+        })),
+      unpairTag: (uid) =>
+        set((s) => ({ pairedTags: s.pairedTags.filter((p) => p.uid !== uid) })),
       setCaps: (p) => set(() => ({ ...p })),
       setDefaultToken: (t) => set({ defaultToken: t }),
     }),
@@ -67,6 +90,7 @@ export const useAppStore = create<AppState>()(
       partialize: (s) => ({
         history: s.history,
         contacts: s.contacts,
+        pairedTags: s.pairedTags,
         perTapCap: s.perTapCap,
         dailyCap: s.dailyCap,
         microThreshold: s.microThreshold,

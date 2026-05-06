@@ -118,11 +118,21 @@ export default function Home() {
           </View>
         </View>
 
-        <View className="flex-row gap-3 mt-5">
+        <View className="mt-5">
+          <Button size="lg" onPress={() => router.push("/tap")}>
+            <Ionicons name="radio-outline" size={20} color="#070912" />
+            {"  "}Tap to Pay
+          </Button>
+        </View>
+        <View className="flex-row gap-3 mt-3">
           <View className="flex-1">
-            <Button size="lg" onPress={() => router.push("/scan")}>
-              <Ionicons name="scan-outline" size={20} color="#070912" />
-              {"  "}Pay
+            <Button
+              size="lg"
+              variant="secondary"
+              onPress={() => router.push("/scan")}
+            >
+              <Ionicons name="scan-outline" size={20} color="#fff" />
+              {"  "}Scan
             </Button>
           </View>
           <View className="flex-1">

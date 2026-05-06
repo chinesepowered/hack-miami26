@@ -23,6 +23,7 @@ export default function Send() {
     splToken?: string;
     memo?: string;
     reference?: string;
+    autoConfirm?: string;
   }>();
 
   const wallet = useWalletStore((s) => s.wallet);
@@ -52,7 +53,10 @@ export default function Send() {
     if (params.amount) setAmount(params.amount);
     if (params.reference) setReference(params.reference);
     if (params.memo) setMemo(params.memo);
-  }, [params.recipient, params.amount, params.reference, params.memo]);
+    if (params.autoConfirm === "1" && params.recipient && Number(params.amount) > 0) {
+      setConfirmOpen(true);
+    }
+  }, [params.recipient, params.amount, params.reference, params.memo, params.autoConfirm]);
 
   const numAmount = Number(amount) || 0;
 
