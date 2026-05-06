@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "TapPay",
+    "slug": "tappay",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "tappay",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.tappay.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "TapPay scans payment QR codes."
+      }
+    },
+    "android": {
+      "package": "com.tappay.app",
+      "permissions": [
+        "android.permission.NFC",
+        "android.permission.CAMERA",
+        "android.permission.VIBRATE",
+        "android.permission.USE_BIOMETRIC"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-camera",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35
+          }
+        }
+      ],
+      [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "TapPay uses NFC to pair phones for tap-to-pay."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
