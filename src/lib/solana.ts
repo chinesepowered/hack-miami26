@@ -13,7 +13,7 @@ import {
   getAccount,
   getMint,
 } from "@solana/spl-token";
-import { RPC_URL, USDC_MINT_DEVNET } from "./constants";
+import { RPC_URL, USDC_MINT } from "./constants";
 
 export const connection = new Connection(RPC_URL, "confirmed");
 
@@ -43,7 +43,7 @@ export type TokenSpec = SolToken | SplToken;
 export const SOL: SolToken = { kind: "SOL" };
 export const USDC: SplToken = {
   kind: "SPL",
-  mint: new PublicKey(USDC_MINT_DEVNET),
+  mint: new PublicKey(USDC_MINT),
   symbol: "USDC",
 };
 

@@ -12,8 +12,8 @@ export const RPC_URL = env(
   "https://api.devnet.solana.com",
 );
 export const CLUSTER = env("EXPO_PUBLIC_CLUSTER", "devnet");
-export const USDC_MINT_DEVNET = env(
-  "EXPO_PUBLIC_USDC_MINT_DEVNET",
+export const USDC_MINT = env(
+  "EXPO_PUBLIC_USDC_MINT",
   "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
 );
 export const DEFAULT_TOKEN = (env("EXPO_PUBLIC_DEFAULT_TOKEN", "SOL") as

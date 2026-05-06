@@ -132,8 +132,9 @@ The full mobile experience without Seeker hardware.
 5. **Wallet setup (one time, on each phone):**
    - Install **Phantom** or **Backpack** from Google Play.
    - Open it, create a new wallet, switch network to **Devnet** (Phantom: Settings → Developer Settings → Devnet).
-   - Get devnet SOL on the *sender* via https://faucet.solana.com.
-6. Open TapPay, tap **Pay** for the first time. The Mobile Wallet Adapter bridge will prompt to authorize Phantom/Backpack. Approve.
+   - Get devnet SOL on the wallet via https://faucet.solana.com.
+6. **Open TapPay → Settings → tap "Connect Mobile Wallet Adapter".** This is required — by default the app boots with a local devnet keypair so it works on emulators. The Connect button surfaces the wallet picker, you pick Phantom/Backpack, and from then on every Pay confirmation goes through that wallet.
+7. The home screen will switch from "Connect a wallet for the full flow" amber banner to a clean state, and the address chip will show "MWA" instead of "local devnet".
 7. **Demo:**
    - Phone B: **Receive** → enter amount → **Show payment code**.
    - Phone A: **Pay** → camera opens → point at B's QR → confirm → ✅ in ~1 second.
@@ -156,7 +157,7 @@ Identical to Path D but with two key differences:
    npx expo run:android --device <seeker-A-serial>
    npx expo run:android --device <seeker-B-serial>
    ```
-5. On first **Pay**, MWA will surface the Seed Vault. Authorize once; subsequent payments use cached authorization.
+5. **Open TapPay → Settings → tap "Connect Mobile Wallet Adapter".** On Seeker, this surfaces Seed Vault directly (no Phantom install needed). Authorize once; subsequent payments use cached authorization and only need the biometric.
 6. Demo identical to Path D, except the biometric prompt feels native (because it is).
 
 For the cleanest stage moment: both Seekers face the audience. One taps **Receive**, the other **Pay**. Tap them together. The receiver's screen flips to ✅ before you can finish saying "and that's it."
@@ -208,7 +209,21 @@ The 7 MB Hermes bundle is normal for this stack. First startup on a low-end phon
 
 ---
 
-## 4 · Demo script (cheat sheet)
+## 4 · Pre-demo smoke test (run this 30 min before going live)
+
+The TypeScript and Metro bundle validate at build time, but a **real device run is the only way to catch runtime issues.** Do this once before you stand in front of judges:
+
+1. Build and install via `npx expo run:android` (or open from `android/` in Android Studio and Run).
+2. **Home screen loads** with a balance card (may say `—` until airdrop completes — wait 20s or hit Settings → Request devnet airdrop).
+3. **Tap Receive → enter `0.01` → Show payment code** — QR should render, the green "Listening for payment…" pulse should appear.
+4. Tap **Copy URL** — confirm "Copied" badge flashes.
+5. On a *second* device or emulator, **Pay → Paste → Continue → Confirm with biometric** — biometric prompt should appear (or skip silently if not enrolled). Watch the 3-second cancel countdown, let it elapse.
+6. The send screen should swap to the green ✓ animation. **Both** screens should land in their "done" state simultaneously.
+7. Tap "View on explorer" — the Solana Explorer URL should open in a browser and show the tx as Confirmed.
+
+If any step fails, fix it before demo day. Common failures and fixes are in §3 above.
+
+## 5 · Demo script (cheat sheet)
 
 For when you're up there with 30 seconds to land it:
 

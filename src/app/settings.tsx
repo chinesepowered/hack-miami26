@@ -5,9 +5,11 @@ import { useAppStore, useWalletStore } from "@/lib/store";
 import { CAN_USE_MWA, IS_EMULATOR, RPC_URL, CLUSTER } from "@/lib/constants";
 import { airdropIfNeeded } from "@/lib/solana";
 import { shortAddress } from "@/lib/format";
+import { connectWallet, getOrCreateLocalWallet } from "@/lib/wallet";
 
 export default function Settings() {
   const wallet = useWalletStore((s) => s.wallet);
+  const setWallet = useWalletStore((s) => s.setWallet);
   const perTapCap = useAppStore((s) => s.perTapCap);
   const dailyCap = useAppStore((s) => s.dailyCap);
   const microThreshold = useAppStore((s) => s.microThreshold);
@@ -18,6 +20,31 @@ export default function Settings() {
   const [perTap, setPerTap] = useState(String(perTapCap));
   const [daily, setDaily] = useState(String(dailyCap));
   const [micro, setMicro] = useState(String(microThreshold));
+  const [connecting, setConnecting] = useState(false);
+
+  const onConnectMwa = async () => {
+    setConnecting(true);
+    try {
+      const w = await connectWallet();
+      setWallet(w);
+      Alert.alert(
+        w.kind === "mwa" ? "Mobile Wallet connected" : "Using local wallet",
+        w.kind === "mwa"
+          ? `Signing now uses ${w.label ?? "your installed wallet"}.`
+          : "No external wallet was found. Install Phantom, Backpack, or use a Seeker.",
+      );
+    } catch (e: any) {
+      Alert.alert("Could not connect", e?.message ?? String(e));
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const onUseLocal = async () => {
+    const w = await getOrCreateLocalWallet();
+    setWallet(w);
+    Alert.alert("Using local wallet", "Switched back to the devnet keypair.");
+  };
 
   const save = () => {
     setCaps({
@@ -41,14 +68,23 @@ export default function Settings() {
           {wallet ? shortAddress(wallet.publicKey.toBase58(), 8, 8) : "—"}
         </Text>
         <Text className="text-ink-500 text-xs mt-1">
-          {wallet?.kind === "mwa" ? "Mobile Wallet Adapter" : "Local devnet keypair"}
+          {wallet?.kind === "mwa"
+            ? `Mobile Wallet Adapter${wallet.label ? ` · ${wallet.label}` : ""}`
+            : "Local devnet keypair"}
           {" · "}
           {CLUSTER}
         </Text>
         <Text className="text-ink-500 text-xs mt-0.5">{RPC_URL}</Text>
 
         {wallet && wallet.kind === "local" ? (
-          <View className="mt-3">
+          <View className="mt-3 gap-2">
+            <Button
+              variant="primary"
+              loading={connecting}
+              onPress={onConnectMwa}
+            >
+              Connect Mobile Wallet Adapter
+            </Button>
             <Button
               variant="secondary"
               onPress={async () => {
@@ -57,6 +93,14 @@ export default function Settings() {
               }}
             >
               Request devnet airdrop
+            </Button>
+          </View>
+        ) : null}
+
+        {wallet && wallet.kind === "mwa" ? (
+          <View className="mt-3">
+            <Button variant="ghost" onPress={onUseLocal}>
+              Switch back to local wallet
             </Button>
           </View>
         ) : null}

@@ -53,7 +53,7 @@ export default function Home() {
             </Text>
             <Text className="text-ink-500 text-xs mt-0.5">
               {wallet ? shortAddress(wallet.publicKey.toBase58(), 5, 5) : "…"}
-              {wallet?.kind === "local" ? " · devnet" : " · seeker"}
+              {wallet?.kind === "local" ? " · local devnet" : " · MWA"}
             </Text>
           </View>
           <Pressable
@@ -75,6 +75,22 @@ export default function Home() {
               the full Seed Vault flow.
             </Text>
           </View>
+        ) : wallet?.kind === "local" ? (
+          <Pressable
+            onPress={() => router.push("/settings")}
+            className="bg-accent-amber/10 border border-accent-amber/30 rounded-xl p-3 mt-4 flex-row items-center justify-between"
+          >
+            <View className="flex-1 pr-3">
+              <Text className="text-accent-amber text-xs font-semibold mb-1">
+                Connect a wallet for the full flow
+              </Text>
+              <Text className="text-ink-500 text-xs leading-4">
+                Tap here to link Phantom / Backpack / Seed Vault via Mobile
+                Wallet Adapter.
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#FFC857" />
+          </Pressable>
         ) : null}
 
         <View className="bg-ink-900 border border-ink-700 rounded-3xl p-6 mt-5">

@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { USDC_MINT_DEVNET } from "./constants";
+import { USDC_MINT } from "./constants";
 
 export type ParsedPayment = {
   recipient: string;
@@ -59,5 +59,5 @@ export function parsePaymentURL(raw: string): ParsedPayment {
 }
 
 export function isUsdcMint(mint?: string) {
-  return !!mint && mint === USDC_MINT_DEVNET;
+  return !!mint && mint === USDC_MINT;
 }
