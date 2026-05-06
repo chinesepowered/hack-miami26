@@ -161,7 +161,15 @@ export default function Settings() {
           {" · "}
           {CLUSTER}
         </Text>
-        <Text className="text-ink-500 text-xs mt-0.5">{RPC_URL}</Text>
+        <Text className="text-ink-500 text-xs mt-0.5">
+          {(() => {
+            try {
+              return new URL(RPC_URL).host;
+            } catch {
+              return "RPC configured";
+            }
+          })()}
+        </Text>
 
         {wallet && wallet.kind === "local" ? (
           <View className="mt-3 gap-2">
