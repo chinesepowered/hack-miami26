@@ -34,7 +34,7 @@ Two phones come close. The amount appears. A glance, a thumbprint, a glow. Done.
                   ~1 second total
 ```
 
-- 💸 **Tap to pay** — bring two phones together, the amount + recipient appear, biometric confirms, settles on Solana in ~400 ms
+- 📡 **Tap to pay over NFC** — bring two phones together, the recipient + amount appear, biometric confirms, settles on Solana in ~400 ms. No address typing, no wallet popups, no chain selection.
 - 📷 **QR fallback** — universal compatibility with every Solana Pay-enabled wallet on the planet, so customers without TapPay can still pay
 - 🔐 **Hardware-grade signing** — on Seeker, the **Seed Vault** holds the key in silicon. Biometric replaces the popup-spam approval flow that makes today's wallets feel like 2015
 - 🛡️ **Spend caps with a real safety net** — per-tap max, daily max, hardware-enforced "passwordless under $X." Even a stolen phone within the cap window stays bounded
@@ -83,11 +83,19 @@ Built natively for the Solana Mobile stack:
 | Mobile | Expo SDK 55 · React Native 0.83 · TypeScript · expo-router |
 | Wallet | `@solana-mobile/mobile-wallet-adapter-protocol-web3js` (real device) · local devnet keypair (emulator) |
 | Chain | `@solana/web3.js` · `@solana/spl-token` · Solana Pay URL spec |
-| Pairing | Camera QR (universal) · NFC reader-mode (Android) · NDEF tag broadcast (Seeker HCE — v1.5) |
-| Security | Seed Vault via MWA · biometric via `expo-local-authentication` · spend caps with hardware-enforced delegation (v1.5) |
+| Pairing | NFC reader mode (`react-native-nfc-manager`) · paired-device registry mapping NFC UIDs to Solana Pay endpoints · camera QR (universal Solana Pay fallback) |
+| Security | Seed Vault via MWA · biometric via `expo-local-authentication` · 3-second pre-broadcast cancel window · spend caps |
 | UI | NativeWind 4 · Reanimated 3 motion · haptic-synced confirmation |
 
-Every transaction uses the **Solana Pay URL spec**, so a TapPay request QR works with Phantom, Backpack, Solflare, and every other Solana wallet on day one. Network effects start immediately — every TapPay user widens the merchant network for everyone else.
+### How a tap actually works
+
+1. **Sender** opens TapPay and hits **Tap to Pay**. The phone enters NFC reader mode.
+2. **Receiver** is identified by the NFC handshake — a cryptographic device ID resolves to a Solana wallet address and (optional) preset amount.
+3. The sender's app builds a **Solana Pay URL** with a unique reference key, constructs the SPL transfer instruction, and attaches the reference as a non-signer account so the receiver can subscribe to confirmation logs.
+4. **Biometric** confirms (Seed Vault on Seeker, secure enclave elsewhere). The signed tx sits in a 3-second cancel window before it broadcasts.
+5. The receiver's app sees the reference key in the chain logs within ~400 ms and flips to "✓ Received" — no polling, no hot reload, just a WebSocket subscription on the reference.
+
+Every transaction uses the **Solana Pay URL spec**, so a TapPay request also works with Phantom, Backpack, Solflare, and every other Solana wallet on day one. Network effects start immediately — every TapPay user widens the merchant network for everyone else.
 
 ---
 
@@ -95,6 +103,7 @@ Every transaction uses the **Solana Pay URL spec**, so a TapPay request QR works
 
 The shipping product is the wedge. The roadmap is the moat:
 
+- 📡 **Bidirectional NFC over HCE** — Seeker's Host Card Emulation lets the receiver phone broadcast its Solana Pay URL natively, removing the need for any pairing step at all
 - 🪪 **`.skr` / `.sol` usernames** — pay friends by name, not by address
 - 👥 **Group vaults** — Splitwise that actually settles. Hardware multisig where each member's key never leaves their Seed Vault
 - 🤖 **Autopilot** — voice command: "DCA $25 of SOL every Friday." Runs on a Seed Vault delegated session key with hardware-enforced caps

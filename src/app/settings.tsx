@@ -65,9 +65,10 @@ export default function Settings() {
     setPairToken(defaultToken);
     setPairPhase("scanning");
     if (!IS_PHYSICAL_DEVICE) {
-      // Emulator: simulate a UID after a short pause so the form is reachable.
+      // Emulator: simulate the same fixed UID that tap.tsx generates,
+      // so pairing once on emulator means the Tap to Pay flow finds a match.
       setTimeout(() => {
-        setPairUid(`emulator-mock-uid-${Date.now().toString(16).slice(-6)}`);
+        setPairUid("emulator-mock-uid-0001");
         setPairPhase("editing");
       }, 1200);
       return;

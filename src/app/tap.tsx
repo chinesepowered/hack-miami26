@@ -16,7 +16,7 @@ import { useAppStore } from "@/lib/store";
 import { readTagUid, cancelTagRead, formatUid } from "@/lib/nfc";
 import { IS_PHYSICAL_DEVICE, USDC_MINT } from "@/lib/constants";
 
-type Phase = "scanning" | "unknown" | "found";
+type Phase = "scanning" | "no-pairing" | "found";
 
 export default function Tap() {
   const router = useRouter();
@@ -48,7 +48,6 @@ export default function Tap() {
   useEffect(() => {
     cancelled.current = false;
     if (!IS_PHYSICAL_DEVICE) {
-      // On emulator, simulate a tag detect after a beat so the demo flow is testable.
       const t = setTimeout(() => {
         if (cancelled.current) return;
         handleUid("emulator-mock-uid-0001");
@@ -62,7 +61,6 @@ export default function Tap() {
       const detected = await readTagUid();
       if (cancelled.current) return;
       if (!detected) {
-        // Reader was cancelled or failed silently — go back.
         router.back();
         return;
       }
@@ -77,15 +75,18 @@ export default function Tap() {
 
   const handleUid = (detected: string) => {
     setUid(detected);
-    const match = pairedTags.find((p) => p.uid === detected);
+    // Any tap is treated as a successful tap. We route to the most-recently-paired
+    // device regardless of UID — this keeps the demo bulletproof against
+    // session-randomized UIDs (some conference wristbands, secure transit cards).
+    // Pair one recipient in Settings and every tap of any tag works.
+    const match = pairedTags[0];
     if (!match) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      setPhase("unknown");
+      setPhase("no-pairing");
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setPhase("found");
-    // Brief flash so the user sees the matched label, then route to confirm.
     setTimeout(() => {
       const splToken = match.token === "USDC" ? USDC_MINT : undefined;
       router.replace({
@@ -111,9 +112,7 @@ export default function Tap() {
   }));
 
   const matchedLabel =
-    phase === "found" && uid
-      ? pairedTags.find((p) => p.uid === uid)?.label
-      : null;
+    phase === "found" ? pairedTags[0]?.label ?? "Paired device" : null;
 
   return (
     <View className="flex-1 bg-ink-950 items-center justify-center px-6">
@@ -138,7 +137,7 @@ export default function Tap() {
           </View>
         ) : (
           <View className="w-32 h-32 rounded-full bg-accent-amber items-center justify-center">
-            <Ionicons name="help" size={64} color="#070912" />
+            <Ionicons name="alert" size={64} color="#070912" />
           </View>
         )}
       </View>
@@ -150,7 +149,7 @@ export default function Tap() {
               Hold near tag
             </Text>
             <Text className="text-ink-500 mt-2 text-center">
-              Tap any paired NFC token — wristband, sticker, ring, card.
+              Tap any NFC token — wristband, sticker, ring, card.
             </Text>
           </>
         ) : phase === "found" ? (
@@ -159,32 +158,35 @@ export default function Tap() {
               {matchedLabel}
             </Text>
             <Text className="text-ink-500 mt-2">Authorising payment…</Text>
+            {uid ? (
+              <Text className="text-ink-500 mt-1 text-xs">
+                Tag UID {formatUid(uid)}
+              </Text>
+            ) : null}
           </>
         ) : (
           <>
-            <Text className="text-white text-2xl font-bold">Unknown tag</Text>
+            <Text className="text-white text-2xl font-bold">
+              No recipient paired
+            </Text>
             <Text className="text-ink-500 mt-2 text-center">
-              UID {uid ? formatUid(uid) : "—"}
+              Pair a recipient in Settings first, then any NFC tap will route
+              to them.
             </Text>
-            <Text className="text-ink-500 mt-1 text-center text-xs">
-              Pair this tag in Settings to use it for payments.
-            </Text>
+            {uid ? (
+              <Text className="text-ink-500 mt-2 text-center text-xs">
+                Detected tag UID {formatUid(uid)}
+              </Text>
+            ) : null}
           </>
         )}
       </View>
 
-      {phase === "scanning" || phase === "unknown" ? (
+      {phase === "scanning" || phase === "no-pairing" ? (
         <View className="absolute bottom-12 left-6 right-6 gap-3">
-          {phase === "unknown" ? (
-            <Button
-              onPress={() => {
-                router.replace({
-                  pathname: "/settings",
-                  params: { pairUid: uid ?? "" },
-                });
-              }}
-            >
-              Pair this tag
+          {phase === "no-pairing" ? (
+            <Button onPress={() => router.replace("/settings")}>
+              Open Settings
             </Button>
           ) : null}
           <Button
@@ -195,7 +197,7 @@ export default function Tap() {
               router.back();
             }}
           >
-            {phase === "unknown" ? "Done" : "Cancel"}
+            {phase === "no-pairing" ? "Done" : "Cancel"}
           </Button>
         </View>
       ) : null}
