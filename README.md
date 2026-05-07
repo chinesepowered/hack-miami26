@@ -4,6 +4,15 @@
 
 A consumer-grade tap-to-pay app for Solana Mobile, built around the one moment crypto has always been bad at: actually paying someone.
 
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=c5a9eZJ0JIs">
+    <img src="https://img.youtube.com/vi/c5a9eZJ0JIs/maxresdefault.jpg" alt="Watch the TapPay demo" width="640">
+  </a>
+</p>
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=c5a9eZJ0JIs"><b>▶ Watch the demo</b></a>
+</p>
+
 ---
 
 ## 🌍 Why this matters
@@ -117,3 +126,13 @@ The shipping product is the wedge. The roadmap is the moat:
 > *Solana Pay made stablecoin payments **possible**. Wallets made them **technically usable**. TapPay makes them **the obvious choice** — one tap, one second, one app your friends already have.*
 
 Tap. Done. That's it.
+
+---
+
+## 📲 Try it
+
+Sideload the latest devnet build on any Android phone:
+
+[**Download TapPay APK**](https://expo.dev/accounts/clai74/projects/tappay/builds/92652316-8319-4393-9812-cfbc0f607d22)
+
+Open the link on the phone, download the APK, accept "install from unknown source" if prompted, and the app launches. Devnet only — no real funds at risk. NFC tap-to-pay, QR scan, and Solana Pay deep links all work out of the box.
