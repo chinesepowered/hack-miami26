@@ -6,7 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useEffect } from "react";
 import { useWalletStore } from "@/lib/store";
-import { getOrCreateLocalWallet } from "@/lib/wallet";
+import { bootWallet } from "@/lib/wallet";
 import { airdropIfNeeded } from "@/lib/solana";
 
 export default function RootLayout() {
@@ -14,10 +14,13 @@ export default function RootLayout() {
 
   useEffect(() => {
     (async () => {
-      // Always boot with a local wallet so the app is usable without MWA.
-      // The Settings screen lets the user upgrade to a hardware wallet.
-      const w = await getOrCreateLocalWallet();
-      airdropIfNeeded(w.publicKey).catch(() => {});
+      // Prefer a cached MWA session if one exists, fall back to the local
+      // devnet keypair. Means judges open the app and it's already connected.
+      const w = await bootWallet();
+      // Only airdrop the local wallet — MWA wallets are user-funded.
+      if (w.kind === "local") {
+        airdropIfNeeded(w.publicKey).catch(() => {});
+      }
       setWallet(w);
     })();
   }, [setWallet]);

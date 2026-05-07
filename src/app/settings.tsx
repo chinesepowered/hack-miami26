@@ -14,7 +14,7 @@ import { useAppStore, useWalletStore } from "@/lib/store";
 import { CAN_USE_MWA, IS_EMULATOR, IS_PHYSICAL_DEVICE, RPC_URL, CLUSTER } from "@/lib/constants";
 import { airdropIfNeeded } from "@/lib/solana";
 import { shortAddress } from "@/lib/format";
-import { connectWallet, getOrCreateLocalWallet } from "@/lib/wallet";
+import { clearMwaSession, connectWallet, getOrCreateLocalWallet } from "@/lib/wallet";
 import { readTagUid, cancelTagRead, formatUid } from "@/lib/nfc";
 
 type PairPhase = "idle" | "scanning" | "editing";
@@ -128,6 +128,7 @@ export default function Settings() {
   };
 
   const onUseLocal = async () => {
+    await clearMwaSession();
     const w = await getOrCreateLocalWallet();
     setWallet(w);
     Alert.alert("Using local wallet", "Switched back to the devnet keypair.");
